@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: Scraping Data Using Test-Driven Development</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">Scraping Data Using Test-Driven Development</h1></a>
+          <h2 class="subtitle">Test-Driven Development</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Explain the test-driven development process and apply it to a simple problem.</li>
+<li>Compose appropriate unit tests for the component functions.</li>
+</ul>
+</div>
+</section>
+<p>First, we need to consider the structure of our scripts.</p>
+<ul>
+<li><code>grab_stations.py</code>:
+<ul>
+<li>receives no input from the command line</li>
+<li>scrapes station location data from the Web</li>
+<li>refactors the data into a sensible data structure</li>
+<li>outputs the station signs and their latitude and longitude (to <code>stdout</code>)</li>
+</ul></li>
+<li><code>grab_forecast.py</code>
+<ul>
+<li>receives station sign and latitude and longitude from <code>stdin</code></li>
+<li>scrapes the corresponding station forecast data from the Web</li>
+<li>refactors the data into a sensible data structure</li>
+<li>outputs the station signs, their latitude and longitude, and today’s forecast (to <code>stdout</code>)</li>
+</ul></li>
+<li><code>plot_forecast.py</code>
+<ul>
+<li>receives station sign, their latitude and longitude, and today’s forecast from <code>stdin</code></li>
+<li>plots station temperature and position against a map of the state of Illinois</li>
+</ul></li>
+</ul>
+<h3 id="script-structure">Script structure</h3>
+<p>Before we consider the technical details of these scripts, let’s actually write some function descriptions for the two scripts we are responsible for.</p>
+<p>Examine the steps above for each file and suggest a structure for the main function. (This is an instructor-guided activity on a whiteboard. The result should look something like the following.)</p>
+<ul>
+<li><p><code>grab_stations.py</code>:</p>
+<pre><code>if __name__ == &#39;__main__&#39;:
+    text = grab_website_data()
+    data = extract_section(text)
+    for line in data.splitlines():
+        try:
+            stn, lat, lon = parse_station_line(line)
+            print(&#39;%s\t%f\t%f&#39;%(stn,lon,lat))
+        except:
+            print(&#39;Could not parse line\n\t%s&#39;%line)</code></pre></li>
+<li><p><code>grab_forecast.py</code>:</p>
+<pre><code>if __name__ == &#39;__main__&#39;:
+    input = grab_stdin()
+    temp_data = grab_forecast_data()
+    for line in input.splitlines():
+        try:
+            stn, lat, lon = line.split(&#39;\t&#39;)
+            temp = get_station_temp(temp_data, stn)
+            print(&#39;%s\t%f\t%f\t%f&#39;%(stn,lon,lat,temp))
+        except:
+            print(&#39;Could not parse line\n\t%s&#39;%line)</code></pre></li>
+</ul>
+<h3 id="function-unit-tests">Function unit tests</h3>
+<p>What sorts of things do we need to specify?</p>
+<ul>
+<li>output format from each script</li>
+<li>format of latitude and longitude</li>
+</ul>
+<p>Let’s write unit tests for a couple of functions then:</p>
+<ul>
+<li><code>parse_station_line</code></li>
+<li><code>get_station_temp</code></li>
+</ul>
+<p>(The others mainly grab or manipulate large blocks of HTML as plain text strings, so we won’t worry about the details of them right now.)</p>
+<h3 id="what-dont-we-know-how-to-do-yet">What don’t we know how to do yet?</h3>
+<p>The instructor should clarify any principles which need to be explained at this point.</p>
+<ul>
+<li><code>requests.text</code></li>
+<li><code>sys.stdin</code></li>
+<li>parse/scrape the text (by inspection)</li>
+</ul>
+<p>Compiled Python bytecode versions have been included in the <code>py2-pyc/</code> and <code>py3-pyc/</code> directories. These can be used to test your code against the others:</p>
+<pre><code>python py2-pyc/grab_stations.pyc | python py2-pyc/grab_forecast.pyc | python py2-pyc/plot_forecast.pyc </code></pre>
+<p>or</p>
+<pre><code>python3 py3-pyc/grab_stations.pyc | python3 py3-pyc/grab_forecast.pyc | python3 py3-pyc/plot_forecast.pyc </code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/capstone-novice-spreadsheet-biblio">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
